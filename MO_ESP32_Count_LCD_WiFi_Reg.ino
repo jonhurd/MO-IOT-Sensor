@@ -184,8 +184,8 @@ void postDataToGoogleSheets() {
     //Serial.print("Time:");
     //Serial.println(asString);
     String urlFinal = "https://script.google.com/macros/s/"+GOOGLE_COUNT_SCRIPT_ID+"/exec?"+"serial="+serialNumber+"&date="+asString+"&count="+String(objectCount);
-    //Serial.print("POST data to spreadsheet:");
-    //Serial.println(urlFinal.c_str());
+    Serial.print("POST data to spreadsheet:");
+    Serial.println(urlFinal.c_str());
     HTTPClient http;
     http.begin(urlFinal.c_str());
     http.setFollowRedirects(HTTPC_STRICT_FOLLOW_REDIRECTS);
