@@ -118,11 +118,11 @@ enum DisplayMode {
 DisplayMode currentMode = RECYCLE_MESSAGE;
 
 //Google Sheets RecycleSerial
-String GOOGLE_SERIAL_SCRIPT_ID = "Serial Scrip";
+String GOOGLE_SERIAL_SCRIPT_ID = "AKfycbwDBgEl-vjkz7JfAZqBd7DNydgBpyJnFOduEUIBSs0EKhRnbxLy1C75RvFu0Y22lnGD";
 //Google Sheets Test Sheet
-String GOOGLE_COUNT_SCRIPT_ID = "Count Script";
+String GOOGLE_COUNT_SCRIPT_ID = "AKfycbwMUCfc434eCU5brwDQ3PPhnH9iSRZCmiQVdWEoEPeLo-qWjn3YntCWfKlbMSbZc_2U";
 //Google Sheets AppConfiguration
-String GOOGLE_CONFIG_SCRIPT_ID = "Config Script";
+String GOOGLE_CONFIG_SCRIPT_ID = "AKfycbz6nPRo1sWOxLn442Nehc_aPl2JUPEC6icez96tvmOhycn0y36o_zvOICIT6pzUWUxneg";
 
 const char* ntpServer = "pool.ntp.org";
 const long  gmtOffset_sec = 19800;
@@ -288,40 +288,40 @@ void parseConfigurationSettings(String configCellData) {
 }
 
 void getConfiguration(void) {
-  lcd.setCursor(0,0);
-  lcd.print("Reading         ");
-  lcd.setCursor(0,1);
-  lcd.print("Configuration   ");
-  //-----------------------------------------------------------------------------------
-  HTTPClient http;
-  String url="https://script.google.com/macros/s/"+GOOGLE_CONFIG_SCRIPT_ID+"/exec?read";
-  //Serial.print(url);
-  Serial.println("Reading Configuration from Google Sheet");
-  http.begin(url.c_str());
-  //-----------------------------------------------------------------------------------
-  //Removes the error "302 Moved Temporarily Error"
-  http.setFollowRedirects(HTTPC_STRICT_FOLLOW_REDIRECTS);
-  //-----------------------------------------------------------------------------------
-  //Get the returning HTTP status code
-  int httpCode = http.GET();
-  Serial.print("HTTP Status Code: ");
-  Serial.println(httpCode);
-  //-----------------------------------------------------------------------------------
-  if(httpCode <= 0){Serial.println("Error on HTTP request"); http.end(); return;}
-  //-----------------------------------------------------------------------------------
-  //Read the requested configuration from Google Sheet
-  String configSettings = http.getString();
-  parseConfigurationSettings(configSettings);
-  Serial.println("Configuration Settings String = "+ configSettings);
-  Serial.println("Recycle Line 2 Message = "+ recycleMessage2);
-  //-----------------------------------------------------------------------------------
-  if(httpCode == 200){
-    //If we reached this point tell the Google Sheet we set the serial number successfully
-    //  updateNextSerialNumber("serial_status=SerialSaved");
-  //-------------------------------------------------------------------------------------
-  http.end();
-  }
+    lcd.setCursor(0,0);
+    lcd.print("Reading         ");
+    lcd.setCursor(0,1);
+    lcd.print("Configuration   ");
+
+    HTTPClient http;
+    String url = "https://script.google.com/macros/s/" + GOOGLE_CONFIG_SCRIPT_ID + "/exec?read";
+    
+    Serial.println("Fetching configuration from: " + url);
+    
+    http.begin(url.c_str());
+    http.setFollowRedirects(HTTPC_STRICT_FOLLOW_REDIRECTS);
+    http.setTimeout(10000);  // Increase timeout to 10 seconds
+
+    int httpCode = http.GET();
+    Serial.print("HTTP Status Code: ");
+    Serial.println(httpCode);
+
+    if (httpCode <= 0) {
+        Serial.println("⚠️ Error on HTTP request - Possible Timeout or Network Issue");
+        Serial.println(http.errorToString(httpCode)); // Print detailed error
+        http.end();
+        return;
+    }
+
+    // Read response
+    String configSettings = http.getString();
+    Serial.println("Received Configuration Data: [" + configSettings + "]");
+
+    parseConfigurationSettings(configSettings);
+    
+    http.end();
 }
+
 
 void configModeCallback(WiFiManager *myWiFiManager) {
   lcd.clear();
